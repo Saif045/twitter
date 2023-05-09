@@ -46,7 +46,7 @@ const PostItem: React.FC<PostItemProps> = ({ data, userId, currentUser }) => {
       toggleLike();
       router.refresh();
     },
-    [loginModal, currentUser, toggleLike, data]
+    [loginModal, currentUser, toggleLike, data, router]
   );
 
   const LikeIcon = hasLiked ? AiFillHeart : AiOutlineHeart;

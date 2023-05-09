@@ -24,7 +24,7 @@ const Form: React.FC<FormProps> = ({
   postId,
   currentUser,
 }) => {
-  const Router = useRouter();
+  const router = useRouter();
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
 
@@ -41,13 +41,13 @@ const Form: React.FC<FormProps> = ({
 
       toast.success("Tweet created");
       setBody("");
-      Router.refresh();
+      router.refresh();
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
-  }, [body, isComment, postId]);
+  }, [body, isComment, postId, router]);
 
   return (
     <div className="border-b-[1px] border-neutral-800 px-5 py-2">

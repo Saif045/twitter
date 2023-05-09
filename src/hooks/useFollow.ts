@@ -10,7 +10,7 @@ const useFollow = ({
   currentUser,
   userId,
 }: {
-  currentUser?: SafeUser;
+  currentUser?: SafeUser | null;
   userId: string;
 }) => {
   const loginModal = useLoginModal();
@@ -21,7 +21,7 @@ const useFollow = ({
 
     router.refresh();
     return list.includes(userId);
-  }, [currentUser, userId]);
+  }, [currentUser, userId ,router]);
 
   const toggleFollow = useCallback(async () => {
     if (!currentUser) {
@@ -44,7 +44,7 @@ const useFollow = ({
     } catch (error) {
       toast.error("Something went wrong");
     }
-  }, [currentUser, isFollowing, userId, loginModal]);
+  }, [currentUser, isFollowing, userId, loginModal ,router]);
 
   return {
     isFollowing,

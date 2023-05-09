@@ -25,43 +25,42 @@ const UserBio: React.FC<UserBioProps> = ({
   if (!currentUser) {
     loginModal.onOpen();
   }
-  if (currentUser && userId) {
-    const { isFollowing, toggleFollow } = useFollow({ userId, currentUser });
 
-    const createdAt = useMemo(() => {
-      if (!fetchedUser?.createdAt) {
-        return null;
-      }
+  const { isFollowing, toggleFollow } = useFollow({ userId, currentUser });
 
-      return format(new Date(fetchedUser.createdAt), "MMMM yyyy");
-    }, [fetchedUser?.createdAt]);
+  const createdAt = useMemo(() => {
+    if (!fetchedUser?.createdAt) {
+      return null;
+    }
 
-    console.log(fetchedUser?.followingIds);
-    return (
-      <div className="border-b-[1px] border-neutral-800 pb-4">
-        <div className="flex justify-end p-2">
-          {currentUser?.id === userId ? (
-            <Button secondary label="Edit" onClick={editModal.onOpen} />
-          ) : (
-            <Button
-              onClick={toggleFollow}
-              label={isFollowing ? "Unfollow" : "Follow"}
-              secondary={!isFollowing}
-              outline={isFollowing}
-            />
-          )}
+    return format(new Date(fetchedUser.createdAt), "MMMM yyyy");
+  }, [fetchedUser?.createdAt]);
+
+  return (
+    <div className="border-b-[1px] border-neutral-800 pb-4">
+      <div className="flex justify-end p-2">
+        {currentUser?.id === userId ? (
+          <Button secondary label="Edit" onClick={editModal.onOpen} />
+        ) : (
+          <Button
+            onClick={toggleFollow}
+            label={isFollowing ? "Unfollow" : "Follow"}
+            secondary={!isFollowing}
+            outline={isFollowing}
+          />
+        )}
+      </div>
+      <div className="mt-8 px-4">
+        <div className="flex flex-col">
+          <p className="text-white text-2xl font-semibold">
+            {fetchedUser?.name}
+          </p>
+          <p className="text-md text-neutral-500">@{fetchedUser?.username}</p>
         </div>
-        <div className="mt-8 px-4">
-          <div className="flex flex-col">
-            <p className="text-white text-2xl font-semibold">
-              {fetchedUser?.name}
-            </p>
-            <p className="text-md text-neutral-500">@{fetchedUser?.username}</p>
-          </div>
-          <div className="flex flex-col mt-4">
-            <p className="text-white">{fetchedUser?.bio}</p>
-            <div
-              className="
+        <div className="flex flex-col mt-4">
+          <p className="text-white">{fetchedUser?.bio}</p>
+          <div
+            className="
               flex 
               flex-row 
               items-center 
@@ -69,25 +68,23 @@ const UserBio: React.FC<UserBioProps> = ({
               mt-4 
               text-neutral-500
           ">
-              <BiCalendar size={24} />
-              <p>Joined {createdAt}</p>
-            </div>
+            <BiCalendar size={24} />
+            <p>Joined {createdAt}</p>
           </div>
-          <div className="flex flex-row items-center mt-4 gap-6">
-            <div className="flex flex-row items-center gap-1">
-              <p className="text-white">{fetchedUser?.followingIds?.length}</p>
-              <p className="text-neutral-500">Following</p>
-            </div>
-            <div className="flex flex-row items-center gap-1">
-              <p className="text-white">{fetchedUser?.followersCount || 0}</p>
-              <p className="text-neutral-500">Followers</p>
-            </div>
+        </div>
+        <div className="flex flex-row items-center mt-4 gap-6">
+          <div className="flex flex-row items-center gap-1">
+            <p className="text-white">{fetchedUser?.followingIds?.length}</p>
+            <p className="text-neutral-500">Following</p>
+          </div>
+          <div className="flex flex-row items-center gap-1">
+            <p className="text-white">{fetchedUser?.followersCount || 0}</p>
+            <p className="text-neutral-500">Followers</p>
           </div>
         </div>
       </div>
-    );
-  }
-  return <></>;
+    </div>
+  );
 };
 
 export default UserBio;

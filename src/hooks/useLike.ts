@@ -17,7 +17,7 @@ const useLike = ({
   currentUser?: SafeUser | null;
 }) => {
   const loginModal = useLoginModal();
-  const Router = useRouter();
+  const router = useRouter();
 
   const hasLiked = useMemo(() => {
     const list = post?.likedIds || [];
@@ -42,11 +42,11 @@ const useLike = ({
       await request();
 
       toast.success("Success");
-      Router.refresh();
+      router.refresh();
     } catch (error) {
       toast.error("Something went wrong");
     }
-  }, [currentUser, hasLiked, post.id, loginModal]);
+  }, [currentUser, hasLiked, post.id, loginModal, router]);
 
   return {
     hasLiked,
