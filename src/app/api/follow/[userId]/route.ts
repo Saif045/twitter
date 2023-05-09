@@ -2,11 +2,14 @@ import prisma from "@/libs/prismadb";
 import getCurrentUser from "@/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+interface IParams {
+  userId?: string;
+}
 
-    const { userId } = body;
+export async function POST(req: Request, { params }: { params: IParams }) {
+  try {
+    const { userId } = params;
+    const currentUser = await getCurrentUser();
 
     if (!userId || typeof userId !== "string") {
       throw new Error("Invalid ID");
@@ -43,6 +46,15 @@ export async function POST(req: Request) {
           hasNotification: true,
         },
       });
+
+      await prisma.user.update({
+        where: {
+          id: currentUser?.id,
+        },
+        data: {
+          followingIds: updatedFollowingIds,
+        },
+      });
     } catch (error) {
       console.log(error);
     }
@@ -54,11 +66,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: IParams }) {
   try {
-    const body = await req.json();
-
-    const { userId } = body;
+    const currentUser = await getCurrentUser();
+    const { userId } = params;
 
     if (!userId || typeof userId !== "string") {
       throw new Error("Invalid ID");
@@ -75,8 +86,6 @@ export async function DELETE(req: Request) {
     }
 
     let updatedFollowingIds = [...(user.followingIds || [])];
-
-    const currentUser = await getCurrentUser();
 
     updatedFollowingIds = updatedFollowingIds.filter(
       (followingId) => followingId !== userId
@@ -95,6 +104,5 @@ export async function DELETE(req: Request) {
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error: error }, { status: 500 });
-
   }
 }

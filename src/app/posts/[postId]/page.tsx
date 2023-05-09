@@ -1,24 +1,23 @@
-"use client";
-import { ClipLoader } from "react-spinners";
-
-import usePost from "@/hooks/usePost";
-
 import Header from "@/components/Header";
 import Form from "@/components/Form";
+import ClientOnly from "@/components/ClientOnly";
+import getCurrentUser from "@/actions/getCurrentUser";
+import getPostById from "@/actions/getPostById";
+import { ClipLoader } from "react-spinners";
 import PostItem from "@/components/posts/PostItem";
 import CommentFeed from "@/components/posts/CommentFeed";
-import ClientOnly from "@/components/ClientOnly";
 
 interface IParams {
   postId: string;
 }
 
-const PostView = ({ params }: { params: IParams }) => {
+const PostView = async ({ params }: { params: IParams }) => {
   const postId = params.postId;
 
-  const { data: fetchedPost, isLoading } = usePost(postId as string);
+  const currentUser = await getCurrentUser();
+  const post = await getPostById({ postId });
 
-  if (isLoading || !fetchedPost) {
+  if (!post) {
     return (
       <div className="flex justify-center items-center h-full">
         <ClipLoader color="lightblue" size={80} />
@@ -28,15 +27,17 @@ const PostView = ({ params }: { params: IParams }) => {
 
   return (
     <>
+      <Header showBackArrow label="Tweet" />
+      <Form
+        currentUser={currentUser}
+        postId={postId as string}
+        isComment
+        placeholder="Tweet your reply"
+      />
+
       <ClientOnly>
-        <Header showBackArrow label="Tweet" />
-        <PostItem data={fetchedPost} />
-        <Form
-          postId={postId as string}
-          isComment
-          placeholder="Tweet your reply"
-        />
-        <CommentFeed comments={fetchedPost?.comments} />
+        <PostItem data={post} currentUser={currentUser} />
+        <CommentFeed comments={post.comments} />
       </ClientOnly>
     </>
   );

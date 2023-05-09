@@ -1,12 +1,9 @@
-"use client"
-import useUsers from '@/hooks/useUsers';
+import getUsers from "@/actions/getUsers";
+import Avatar from "../Avatar";
 
-import Avatar from '../Avatar';
-
-const FollowBar = () => {
-  const { data: users = [] } = useUsers();
-
-  if (users.length === 0) {
+const FollowBar = async () => {
+  const users = await getUsers();
+  if (users.length === 0 || !users) {
     return null;
   }
 

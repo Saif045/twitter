@@ -2,16 +2,18 @@ import prisma from "@/libs/prismadb";
 import getCurrentUser from "@/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+interface IParams {
+  postId?: string;
+}
+
+export async function POST(req: Request, { params }: { params: IParams }) {
   const currentUser = await getCurrentUser();
 
   try {
-    const body = await req.json();
+    const { postId } = params;
 
-    const { postId } = body;
-
-    if (!postId || typeof postId !== "string") {
-      throw new Error("Invalid ID");
+    if (!postId || typeof postId !== "string" || !currentUser) {
+      throw new NextResponse("Invalid ID", { status: 400 });
     }
 
     const post = await prisma.post.findUnique({
@@ -21,16 +23,16 @@ export async function POST(req: Request) {
     });
 
     if (!post) {
-      throw new Error("Invalid ID");
+      throw new NextResponse("Invalid ID", { status: 400 });
     }
 
     let updatedLikedIds = [...(post.likedIds || [])];
 
-    updatedLikedIds.push(currentUser?.id as string);
+    updatedLikedIds.push(currentUser.id);
 
     // NOTIFICATION PART START
     try {
-      if (post?.userId) {
+      if (post.userId) {
         await prisma.notification.create({
           data: {
             body: "Someone liked your tweet!",
@@ -46,6 +48,14 @@ export async function POST(req: Request) {
             hasNotification: true,
           },
         });
+        await prisma.post.update({
+          where: {
+            id: postId,
+          },
+          data: {
+            likedIds: updatedLikedIds,
+          },
+        });
       }
     } catch (error) {
       console.log(error);
@@ -58,34 +68,31 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: IParams }) {
   const currentUser = await getCurrentUser();
-  try {
-    const body = await req.json();
 
-    const { postId } = body;
+  try {
+    const { postId } = params;
 
     if (!postId || typeof postId !== "string") {
-      throw new Error("Invalid ID");
+      throw new NextResponse("Invalid ID", { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
+    const post = await prisma.post.findUnique({
       where: {
         id: postId,
       },
     });
 
-    if (!user) {
-      throw new Error("Invalid ID");
+    if (!post) {
+      throw new NextResponse("Invalid ID", { status: 400 });
     }
-
-    let updatedLikedIds = [...(user.followingIds || [])];
+    let updatedLikedIds = [...(post.likedIds || [])];
 
     updatedLikedIds = updatedLikedIds.filter(
       (likedId) => likedId !== currentUser?.id
     );
-
-    const updatedPost = await prisma.post.update({
+    let updatedPost = await prisma.post.update({
       where: {
         id: postId,
       },
@@ -98,6 +105,5 @@ export async function DELETE(req: Request) {
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error: error }, { status: 500 });
-
   }
 }

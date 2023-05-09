@@ -1,24 +1,29 @@
+"use client";
 import axios from "axios";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-
-import useCurrentUser from "./useCurrentUser";
 import useLoginModal from "./useLoginModal";
-import usePost from "./usePost";
-import usePosts from "./usePosts";
+import getPostById from "@/actions/getPostById";
+import getCurrentUser from "@/actions/getCurrentUser";
+import { SafeUser } from "@/types";
+import { Post } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
-const useLike = ({ postId, userId }: { postId: string, userId?: string }) => {
-  const { data: currentUser } = useCurrentUser();
-  const { data: fetchedPost, mutate: mutateFetchedPost } = usePost(postId);
-  const { mutate: mutateFetchedPosts } = usePosts(userId);
-
+const useLike = ({
+  post,
+  currentUser,
+}: {
+  post: Post;
+  currentUser?: SafeUser | null;
+}) => {
   const loginModal = useLoginModal();
+  const Router = useRouter();
 
   const hasLiked = useMemo(() => {
-    const list = fetchedPost?.likedIds || [];
+    const list = post?.likedIds || [];
 
-    return list.includes(currentUser?.id);
-  }, [fetchedPost, currentUser]);
+    return list.includes(currentUser?.id as string);
+  }, [post, currentUser]);
 
   const toggleLike = useCallback(async () => {
     if (!currentUser) {
@@ -29,25 +34,24 @@ const useLike = ({ postId, userId }: { postId: string, userId?: string }) => {
       let request;
 
       if (hasLiked) {
-        request = () => axios.delete('/api/like', { data: { postId } });
+        request = () => axios.delete(`/api/like/${post.id}`);
       } else {
-        request = () => axios.post('/api/like', { postId });
+        request = () => axios.post(`/api/like/${post.id}`);
       }
 
       await request();
-      mutateFetchedPost();
-      mutateFetchedPosts();
 
-      toast.success('Success');
+      toast.success("Success");
+      Router.refresh();
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error("Something went wrong");
     }
-  }, [currentUser, hasLiked, postId, mutateFetchedPosts, mutateFetchedPost, loginModal]);
+  }, [currentUser, hasLiked, post.id, loginModal]);
 
   return {
     hasLiked,
     toggleLike,
-  }
-}
+  };
+};
 
 export default useLike;

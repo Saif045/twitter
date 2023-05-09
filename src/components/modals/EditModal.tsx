@@ -1,77 +1,93 @@
-
-"use client"
+"use client";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import useCurrentUser from "@/hooks/useCurrentUser";
 import useEditModal from "@/hooks/useEditModal";
-import useUser from "@/hooks/useUser";
 import Input from "../Input";
 import Modal from "../Modal";
 import ImageUpload from "../ImageUpload";
+import { SafeUser } from "@/types";
 
-const EditModal = () => {
-  const { data: currentUser } = useCurrentUser();
-  const { mutate: mutateFetchedUser } = useUser(currentUser?.id);
+interface EditModalProps {
+  currentUser?: SafeUser | null;
+}
+
+const EditModal: React.FC<EditModalProps> = ({ currentUser }) => {
   const editModal = useEditModal();
 
-  const [profileImage, setProfileImage] = useState('');
-  const [coverImage, setCoverImage] = useState('');
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('');
+  const [profileImage, setProfileImage] = useState(
+    currentUser?.profileImage || ""
+  );
+  const [coverImage, setCoverImage] = useState(currentUser?.coverImage || "");
+  const [name, setName] = useState(currentUser?.name || "");
+  const [username, setUsername] = useState(currentUser?.username || "");
+  const [bio, setBio] = useState(currentUser?.bio || "");
 
-  useEffect(() => {
-    setProfileImage(currentUser?.profileImage)
-    setCoverImage(currentUser?.coverImage)
-    setName(currentUser?.name)
-    setUsername(currentUser?.username)
-    setBio(currentUser?.bio)
-  }, [currentUser?.name, currentUser?.username, currentUser?.bio, currentUser?.profileImage, currentUser?.coverImage]);
-  
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      await axios.patch('/api/edit', { name, username, bio, profileImage, coverImage });
-      mutateFetchedUser();
+      await axios.patch("/api/edit", {
+        name,
+        username,
+        bio,
+        profileImage,
+        coverImage,
+      });
 
-      toast.success('Updated');
+      toast.success("Updated");
 
       editModal.onClose();
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
-  }, [editModal, name, username, bio, mutateFetchedUser, profileImage, coverImage]);
+  }, [
+    editModal,
+    name,
+    username,
+    bio,
+    profileImage,
+    coverImage,
+  ]);
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
-      <ImageUpload value={profileImage} disabled={isLoading} onChange={(image) => setProfileImage(image)} label="Upload profile image" />
-      <ImageUpload value={coverImage} disabled={isLoading} onChange={(image) => setCoverImage(image)} label="Upload cover image" />
+      <ImageUpload
+        value={profileImage}
+        disabled={isLoading}
+        onChange={(image) => setProfileImage(image)}
+        label="Upload profile image"
+      />
+      <ImageUpload
+        value={coverImage}
+        disabled={isLoading}
+        onChange={(image) => setCoverImage(image)}
+        label="Upload cover image"
+      />
       <Input
         placeholder="Name"
         onChange={(e) => setName(e.target.value)}
         value={name}
-        disabled={isLoading}  
+        disabled={isLoading}
       />
-      <Input 
+      <Input
         placeholder="Username"
         onChange={(e) => setUsername(e.target.value)}
         value={username}
-        disabled={isLoading} 
+        disabled={isLoading}
       />
-      <Input 
+      <Input
         placeholder="Bio"
         onChange={(e) => setBio(e.target.value)}
         value={bio}
-        disabled={isLoading} 
+        disabled={isLoading}
       />
     </div>
-  )
+  );
 
   return (
     <Modal
@@ -84,6 +100,6 @@ const EditModal = () => {
       body={bodyContent}
     />
   );
-}
+};
 
 export default EditModal;

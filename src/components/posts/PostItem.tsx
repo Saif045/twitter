@@ -5,28 +5,30 @@ import { AiFillHeart, AiOutlineHeart, AiOutlineMessage } from "react-icons/ai";
 import { formatDistanceToNowStrict } from "date-fns";
 
 import useLoginModal from "@/hooks/useLoginModal";
-import useCurrentUser from "@/hooks/useCurrentUser";
 import useLike from "@/hooks/useLike";
 
 import Avatar from "../Avatar";
+import { SafeUser } from "@/types";
+import { Post } from "@prisma/client";
 interface PostItemProps {
-  data: Record<string, any>;
+  data: any;
   userId?: string;
+
+  currentUser?: SafeUser | null;
 }
 
-const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
+const PostItem: React.FC<PostItemProps> = ({ data, userId, currentUser }) => {
   const router = useRouter();
   const loginModal = useLoginModal();
 
-  const { data: currentUser } = useCurrentUser();
-  const { hasLiked, toggleLike } = useLike({ postId: data.id, userId });
+  const { hasLiked, toggleLike } = useLike({ post: data, currentUser });
 
   const goToUser = useCallback(
     (ev: any) => {
       ev.stopPropagation();
-      router.push(`/users/${data.user.id}`);
+      router.push(`/users/${data.user?.id}`);
     },
-    [router, data.user.id]
+    [router, data.user?.id]
   );
 
   const goToPost = useCallback(() => {
@@ -42,8 +44,9 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
       }
 
       toggleLike();
+      router.refresh();
     },
-    [loginModal, currentUser, toggleLike]
+    [loginModal, currentUser, toggleLike, data]
   );
 
   const LikeIcon = hasLiked ? AiFillHeart : AiOutlineHeart;
@@ -68,7 +71,7 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
         transition
       ">
       <div className="flex flex-row items-start gap-3">
-        <Avatar userId={data.user.id} />
+        <Avatar userId={data.user?.id} />
         <div>
           <div className="flex flex-row items-center gap-2">
             <p
@@ -79,7 +82,7 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
                 cursor-pointer 
                 hover:underline
             ">
-              {data.user.name}
+              {data.user?.name}
             </p>
             <span
               onClick={goToUser}
@@ -90,7 +93,7 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
                 hidden
                 md:block
             ">
-              @{data.user.username}
+              @{data.user?.username}
             </span>
             <span className="text-neutral-500 text-sm">{createdAt}</span>
           </div>
@@ -123,7 +126,7 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
                 hover:text-red-500
             ">
               <LikeIcon color={hasLiked ? "red" : ""} size={20} />
-              <p>{data.likedIds.length}</p>
+              <p>{data.likedIds?.length}</p>
             </div>
           </div>
         </div>

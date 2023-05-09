@@ -1,17 +1,11 @@
-import { NextApiRequest, NextApiResponse } from "next";
-
-import prisma from "@/libs/prismadb";
-import { NextResponse } from "next/server";
+import prisma from "../libs/prismadb";
 
 interface IParams {
   userId: string;
 }
-export  async function GET(
-  req: Request,
-  { params }: { params: IParams }
-) {
+export default async function getNotifications(params: IParams) {
   try {
-    const { userId } = params
+    const { userId } = params;
 
     if (!userId || typeof userId !== "string") {
       throw new Error("Invalid ID");
@@ -35,10 +29,8 @@ export  async function GET(
       },
     });
 
-    return NextResponse.json(notifications);
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: error }, { status: 500 });
-
+    return notifications;
+  } catch (error: any) {
+    throw new Error(error);
   }
 }

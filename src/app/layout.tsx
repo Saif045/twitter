@@ -18,14 +18,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const currentUser = await getCurrentUser();
-  console.log(currentUser);
   return (
     <html lang="en">
       <ClientOnly>
         <Toaster />
         <RegisterModal />
         <LoginModal />
-        {/*@ts-ignore*/}
         <EditModal currentUser={currentUser} />
       </ClientOnly>
       <body>

@@ -1,15 +1,19 @@
-import React from 'react';
+import React from "react";
+import FollowBar from "@/components/layout/FollowBar";
+import Sidebar from "@/components/layout/Sidebar";
+interface LayoutProps {
+  children: React.ReactNode;
+}
 
-import FollowBar from "@/components/layout/FollowBar"
-import Sidebar from "@/components/layout/Sidebar"
-
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="h-screen bg-black">
       <div className="container h-full mx-auto xl:px-30 max-w-6xl">
         <div className="grid grid-cols-4 h-full">
+          {/* @ts-expect-error Server Component */}
           <Sidebar />
-          <div 
+
+          <div
             className="
               col-span-3 
               lg:col-span-2 
@@ -18,11 +22,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           ">
             {children}
           </div>
+          {/* @ts-expect-error Server Component */}
           <FollowBar />
         </div>
-     </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default Layout;
