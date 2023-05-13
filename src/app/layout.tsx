@@ -6,6 +6,8 @@ import LoginModal from "@/components/modals/LoginModal";
 import EditModal from "@/components/modals/EditModal";
 import Layout from "@/components/Layout";
 import ClientOnly from "@/components/ClientOnly";
+import { Analytics } from '@vercel/analytics/react';
+
 
 export const metadata = {
   title: "Create Next App",
@@ -27,6 +29,8 @@ export default async function RootLayout({
         <EditModal currentUser={currentUser} />
       </ClientOnly>
       <body>
+      <Analytics/>
+
         <Layout>{children}</Layout>
       </body>
     </html>
